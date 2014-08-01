@@ -107,9 +107,11 @@ stringPts=zeros(16*(N-1),3);
 % iterate over number of frames to render
 frame=0;
 num_frames_to_render = 100;
-videoObject = VideoWriter('videos/SpineCombinedLoading2DPerspective.avi');
-videoObject.Quality = 100;
-videoObject.FrameRate = 5;
+
+% Uncomment these lines to save a video
+%videoObject = VideoWriter('videos/SpineExample.avi');
+%videoObject.Quality = 100;
+%videoObject.FrameRate = 5;
 
 % Main loop
 while frame < num_frames_to_render
@@ -254,8 +256,9 @@ while frame < num_frames_to_render
 end
 
 % Save the movie we generated
-open(videoObject);
-writeVideo(videoObject, M);
-close(videoObject);
+% Uncomment these 3 lines to save a video
+%open(videoObject);
+%writeVideo(videoObject, M);
+%close(videoObject);
     
     
