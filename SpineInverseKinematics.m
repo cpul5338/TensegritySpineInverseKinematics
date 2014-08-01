@@ -42,7 +42,7 @@ C_base=[ 1  0  0  0  0  0  0  0 ; %A
 
 
 %Number of tetrahedra (spine nodes)
-N=6;
+N=5;
 C=zeros((N-1)*8,N*4);
 B=zeros(N*6,N*4);
 
@@ -107,6 +107,9 @@ stringPts=zeros(16*(N-1),3);
 % iterate over number of frames to render
 frame=0;
 num_frames_to_render = 100;
+videoObject = VideoWriter('videos/SpineCombinedLoading2DPerspective.avi');
+videoObject.Quality = 100;
+videoObject.FrameRate = 5;
 
 % Main loop
 while frame < num_frames_to_render
@@ -116,11 +119,11 @@ while frame < num_frames_to_render
     % Uncomment zR to see torsion, and yR for bending
     if zR<3.14/8 && state==1
         zR = zR + 0.02;
-        %yR = yR - 0.02;
+        yR = yR - 0.02;
     else   
         if zR>-3.14/8 && state==-1
             zR = zR - 0.02;
-            %yR = yR + 0.02;
+            yR = yR + 0.02;
         else
             state=-state;
         end
@@ -221,23 +224,38 @@ while frame < num_frames_to_render
         hold on;
     end
     grid on;
-    axis equal;
+    
+    %axis equal;
+    % For 2D perspective:
+    view([0 0]);
+    %view([90 0]);
     
     % Plot the strings, with the thickness proportional to the force
     for i=0:((N-1)*8-1);
        plot3(stringPts((1:2)+2*i,1),stringPts((1:2)+2*i,2),stringPts((1:2)+2*i,3),color(1+i),'LineWidth',abs(0.1*Force(1+i)))
     end
     
-    % Rescale this plot
+    % Rescale this plot's axes
     xlim([-0.3 0.3]);
     ylim([-0.3 0.3]);
     zlim([0 0.4]);
+    
+    % Rescale the plot's absolute size
+    set(gcf, 'Units', 'pixels');
+    %set(gcf, 'Position', [0, 0, 1600, 800]);
+    
+    % Save this frame
+    M(frame) = getframe(gcf);
     
     % Pause in between successive plots - this makes it video-like
     % To slow down the video, set a longer pause here. Units are seconds.
     pause(0.04);
       
 end
-    
+
+% Save the movie we generated
+open(videoObject);
+writeVideo(videoObject, M);
+close(videoObject);
     
     
