@@ -18,6 +18,7 @@ clc;
 clear all;
 close all;
 
+
 %w is a vector used to navigate the nullspace of cable force densities
 w=ones(20,1)*10;
 %This is the bar connectivity matrix for one tetrahedron
@@ -106,12 +107,18 @@ stringPts=zeros(16*(N-1),3);
 
 % iterate over number of frames to render
 frame=0;
-num_frames_to_render = 100;
+num_frames_to_render = 40;
 
 % Uncomment these lines to save a video
 %videoObject = VideoWriter('videos/SpineExample.avi');
 %videoObject.Quality = 100;
 %videoObject.FrameRate = 5;
+
+
+% Keep track of cable lengths over successive iterations. Column is time index.
+% Note that I just copied Jeff's sizing for his stringLengths variable here,
+% I haven't actually counted and justified to myself that we really have 16*(N-1) cables.
+stringLengthsOverTime = zeros(16*(N-1)-1, num_frames_to_render);
 
 % Main loop
 while frame < num_frames_to_render
@@ -120,11 +127,11 @@ while frame < num_frames_to_render
     % Define the incremental rotations/bending of successive tetra nodes
     % Uncomment zR to see torsion, and yR for bending
     if zR<3.14/8 && state==1
-        zR = zR + 0.02;
-        yR = yR - 0.02;
+        %zR = zR + 0.02;
+        yR = yR - 0.01;
     else   
         if zR>-3.14/8 && state==-1
-            zR = zR - 0.02;
+            %zR = zR - 0.02;
             yR = yR + 0.02;
         else
             state=-state;
@@ -140,7 +147,8 @@ while frame < num_frames_to_render
     zRotation = makehgtform('zrotate',zR);
 
     for i=1:N-1    
-        tetraNodes((4*i+1):end,:)=(zRotation*zTranslation *tetraNodes((4*i+1):end,:)')'; centers((i+1):N,:)=(zRotation*zTranslation*centers((i+1):N,:)')';
+        tetraNodes((4*i+1):end,:)=(zRotation*zTranslation *tetraNodes((4*i+1):end,:)')'; 
+        centers((i+1):N,:)=(zRotation*zTranslation*centers((i+1):N,:)')';
     end
     
     %After you translate the tetrahedrons vertically and spin them about
@@ -199,6 +207,9 @@ while frame < num_frames_to_render
     Lengths= stringLengths(1:2:end);
     L0=Lengths-Lengths.*q(1:(N-1)*8)./K;
     
+    % Record the string lengths
+    stringLengthsOverTime(:,frame) = stringLengths;
+    
     % Calculate the forces in the cables, and record the color differently
     % if they're in tension or compression
     Force=Lengths.*q(1:(N-1)*8);
@@ -229,8 +240,8 @@ while frame < num_frames_to_render
     
     %axis equal;
     % For 2D perspective:
-    view([0 0]);
-    %view([90 0]);
+    %view([0 0]);
+    view([90 0]);
     
     % Plot the strings, with the thickness proportional to the force
     for i=0:((N-1)*8-1);
@@ -243,7 +254,7 @@ while frame < num_frames_to_render
     zlim([0 0.4]);
     
     % Rescale the plot's absolute size
-    set(gcf, 'Units', 'pixels');
+    %set(gcf, 'Units', 'pixels');
     %set(gcf, 'Position', [0, 0, 1600, 800]);
     
     % Save this frame
@@ -254,6 +265,11 @@ while frame < num_frames_to_render
     pause(0.04);
       
 end
+
+% Plot the length trajectory of one cable
+figure;
+hold on;
+plot(stringLengthsOverTime(24,:));
 
 % Save the movie we generated
 % Uncomment these 3 lines to save a video
