@@ -80,7 +80,10 @@ K=1000*ones((N-1)*8,1); %N/m
  
 hFig = figure(1);
 set(hFig, 'Position', [800 50 1000 1200])
-options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');
+% -----------Comment/Uncomment below accordingly-------------
+% options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');       %2014 ver.
+options = optimset('Algorithm','interior-point-convex','Display','off');                        %2012 ver.
+% -----------------------------------------------------------
 state=1;
 h=sqrt(L^2-1/2*L^2); % height of tetrahedron... I made this equation a while ago I should double check it. 
 
@@ -102,8 +105,10 @@ for i=1:N-1
     tetraNodesPreTransform = [tetraNodesPreTransform; holder1];
     centersPreTransform=[centersPreTransform; holder2];
 end
-           
-stringPts=zeros(16*(N-1),3);
+
+%8 strings x 2 [points/string] (4 verticals + 4 saddles)
+%X,Y,Z
+stringPts=zeros(16*(N-1),3);        
 
 % iterate over number of frames to render
 frame=0;
@@ -120,18 +125,26 @@ num_frames_to_render = 40;
 % I haven't actually counted and justified to myself that we really have 16*(N-1) cables.
 stringLengthsOverTime = zeros(16*(N-1)-1, num_frames_to_render);
 
+% ----------------Record changes in cable length (CHANWOO)---------------------------
+% stringLengthHistoryVert = zeros(number of connections, 4verticals , time scale);
+stringLengthHistoryVert = zeros(N-1,4,num_frames_to_render);
+% stringLengthHistorySadd = zeros(number of connections, 4saddles , time scale);
+stringLengthHistorySadd = zeros(N-1,4,num_frames_to_render);
+%------------------------------------------------------------------------------------
+
+
 % Main loop
 while frame < num_frames_to_render
-    frame=frame+1;
+    frame=frame+1;      %=counter
     
     % Define the incremental rotations/bending of successive tetra nodes
     % Uncomment zR to see torsion, and yR for bending
     if zR<3.14/8 && state==1
-        %zR = zR + 0.02;
+        zR = zR + 0.02;
         yR = yR - 0.01;
     else   
         if zR>-3.14/8 && state==-1
-            %zR = zR - 0.02;
+            zR = zR - 0.02;
             yR = yR + 0.02;
         else
             state=-state;
@@ -210,6 +223,18 @@ while frame < num_frames_to_render
     % Record the string lengths
     stringLengthsOverTime(:,frame) = stringLengths;
     
+    
+    %----------- CABLE LENGTH RECORDER (CHANWOO)-------------------------
+    for i = 1:N-1       % Connection between tetrahedrons
+        for j = 1:4     % 4verticals & 4saddles per 1 connection
+            stringLengthHistoryVert(i,j,frame) = getLengths(stringPts((j*2-1:j*2)+16*(i-1),1),stringPts((j*2-1:j*2)+16*(i-1),2),stringPts((j*2-1:j*2)+16*(i-1),3));
+
+            stringLengthHistorySadd(i,j,frame) = getLengths(stringPts(((j*2-1)+8:j*2+8)+16*(i-1),1),stringPts(((j*2-1)+8:j*2+8)+16*(i-1),2),stringPts(((j*2-1)+8:j*2+8)+16*(i-1),3));
+        end
+    end
+    
+    %---------------------------------------------------------------------
+
     % Calculate the forces in the cables, and record the color differently
     % if they're in tension or compression
     Force=Lengths.*q(1:(N-1)*8);
@@ -270,6 +295,12 @@ end
 figure;
 hold on;
 plot(stringLengthsOverTime(24,:));
+
+% Plot changes in length of each cable over time (CHANWOO)
+% Refer to plotLengthChange.m file
+plotLengthChange
+
+
 
 % Save the movie we generated
 % Uncomment these 3 lines to save a video
