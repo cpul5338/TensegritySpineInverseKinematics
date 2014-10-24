@@ -1,3 +1,5 @@
+% ChanWoo
+
 % Plot Changes of Cable
 % Function
 % stringLengthHistoryVert(A,B,C)

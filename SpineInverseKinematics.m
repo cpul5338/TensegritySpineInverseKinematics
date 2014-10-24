@@ -81,8 +81,8 @@ K=1000*ones((N-1)*8,1); %N/m
 hFig = figure(1);
 set(hFig, 'Position', [800 50 1000 1200])
 % -----------Comment/Uncomment below accordingly-------------
-% options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');       %2014 ver.
-options = optimset('Algorithm','interior-point-convex','Display','off');                        %2012 ver.
+options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');       %2014 ver.
+% options = optimset('Algorithm','interior-point-convex','Display','off');                        %2012 ver.
 % -----------------------------------------------------------
 state=1;
 h=sqrt(L^2-1/2*L^2); % height of tetrahedron... I made this equation a while ago I should double check it. 
@@ -140,12 +140,12 @@ while frame < num_frames_to_render
     % Define the incremental rotations/bending of successive tetra nodes
     % Uncomment zR to see torsion, and yR for bending
     if zR<3.14/8 && state==1
-        zR = zR + 0.02;
+%         zR = zR + 0.02;
         yR = yR - 0.01;
     else   
         if zR>-3.14/8 && state==-1
-            zR = zR - 0.02;
-            yR = yR + 0.02;
+%             zR = zR - 0.02;
+            yR = yR + 0.01;
         else
             state=-state;
         end
@@ -232,7 +232,6 @@ while frame < num_frames_to_render
             stringLengthHistorySadd(i,j,frame) = getLengths(stringPts(((j*2-1)+8:j*2+8)+16*(i-1),1),stringPts(((j*2-1)+8:j*2+8)+16*(i-1),2),stringPts(((j*2-1)+8:j*2+8)+16*(i-1),3));
         end
     end
-    
     %---------------------------------------------------------------------
 
     % Calculate the forces in the cables, and record the color differently
@@ -297,8 +296,10 @@ hold on;
 plot(stringLengthsOverTime(24,:));
 
 % Plot changes in length of each cable over time (CHANWOO)
-% Refer to plotLengthChange.m file
+% Refer to plotLengthChange.m file; gearRatioFinder.m
+
 plotLengthChange
+gearRatioFinder
 
 
 
