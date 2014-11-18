@@ -108,11 +108,13 @@ end
 
 %8 strings x 2 [points/string] (4 verticals + 4 saddles)
 %X,Y,Z
-stringPts=zeros(16*(N-1),3);        
+stringPts=zeros(16*(N-1),3);
+temp = zeros((N-1)*8,3);
+
 
 % iterate over number of frames to render
 frame=0;
-num_frames_to_render = 70;
+num_frames_to_render = 40;
 
 % Uncomment these lines to save a video
 %videoObject = VideoWriter('videos/SpineExample.avi');
@@ -223,11 +225,29 @@ while frame < num_frames_to_render
     % Record the string lengths
     stringLengthsOverTime(:,frame) = stringLengths;
     
+
+% Storing string points for plotting & get length
+%     1 3 5 7
+%     2 4 6 8
+%     18 20 22 24
+%     34 36 38 40
+%     50 52 54 56
+    
+    for i = 1:(N-1)
+        temp(1+8*(i-1),:) = stringPts(1,:);
+        temp(3+8*(i-1),:) = stringPts(3,:);
+        temp(5+8*(i-1),:) = stringPts(5,:);
+        temp(7+8*(i-1),:) = stringPts(7,:);
+        temp(2+8*(i-1),:) = stringPts(2+(i-1)*16,:);
+        temp(4+8*(i-1),:) = stringPts(4+(i-1)*16,:);
+        temp(6+8*(i-1),:) = stringPts(6+(i-1)*16,:);
+        temp(8+8*(i-1),:) = stringPts(8+(i-1)*16,:);
+    end
     
     %----------- CABLE LENGTH RECORDER (CHANWOO)-------------------------
     for i = 1:N-1       % Connection between tetrahedrons
         for j = 1:4     % 4verticals & 4saddles per 1 connection
-            stringLengthHistoryVert(i,j,frame) = getLengths(stringPts((j*2-1:j*2)+16*(i-1),1),stringPts((j*2-1:j*2)+16*(i-1),2),stringPts((j*2-1:j*2)+16*(i-1),3));
+            stringLengthHistoryVert(i,j,frame) = getLengths(temp((j*2-1:j*2)+(i-1)*8,1),temp((j*2-1:j*2)+(i-1)*8,2),temp((j*2-1:j*2)+(i-1)*8,3));
 
             stringLengthHistorySadd(i,j,frame) = getLengths(stringPts(((j*2-1)+8:j*2+8)+16*(i-1),1),stringPts(((j*2-1)+8:j*2+8)+16*(i-1),2),stringPts(((j*2-1)+8:j*2+8)+16*(i-1),3));
         end
@@ -268,8 +288,15 @@ while frame < num_frames_to_render
     view([90 0]);
     
     % Plot the strings, with the thickness proportional to the force
-    for i=0:((N-1)*8-1);
-       plot3(stringPts((1:2)+2*i,1),stringPts((1:2)+2*i,2),stringPts((1:2)+2*i,3),color(1+i),'LineWidth',abs(0.1*Force(1+i)))
+    
+    for i=1:(N-1)*4    
+        plot3(temp((1:2)+2*(i-1),1),temp((1:2)+2*(i-1),2),temp((1:2)+2*(i-1),3),color(1+i),'LineWidth',abs(0.1*Force(1+i)))
+    end
+    for i=1:N-1;
+       plot3(stringPts((9:10)+16*(i-1),1),stringPts((9:10)+16*(i-1),2),stringPts((9:10)+16*(i-1),3),color(1+i),'LineWidth',abs(0.1*Force(1+i)))
+       plot3(stringPts((11:12)+16*(i-1),1),stringPts((11:12)+16*(i-1),2),stringPts((11:12)+16*(i-1),3),color(1+i),'LineWidth',abs(0.1*Force(1+i)))
+       plot3(stringPts((13:14)+16*(i-1),1),stringPts((13:14)+16*(i-1),2),stringPts((13:14)+16*(i-1),3),color(1+i),'LineWidth',abs(0.1*Force(1+i)))
+       plot3(stringPts((15:16)+16*(i-1),1),stringPts((15:16)+16*(i-1),2),stringPts((15:16)+16*(i-1),3),color(1+i),'LineWidth',abs(0.1*Force(1+i)))
     end
     
     % Rescale this plot's axes
@@ -296,11 +323,8 @@ hold on;
 plot(stringLengthsOverTime(24,:));
 
 % Plot changes in length of each cable over time (CHANWOO)
-% Refer to plotLengthChange.m file; gearRatioFinder.m
-
 plotLengthChange
 gearRatioFinder
-
 
 
 % Save the movie we generated
