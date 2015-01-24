@@ -125,6 +125,9 @@ num_frames_to_render = 20;
 % I haven't actually counted and justified to myself that we really have 16*(N-1) cables.
 stringLengthsOverTime = zeros(16*(N-1)-1, num_frames_to_render);
 
+% Maybe we just need every other element
+lengthsOverTime = zeros((N-1)*8, num_frames_to_render);
+
 % ----------------Record changes in cable length (CHANWOO)---------------------------
 % stringLengthHistoryVert = zeros(number of connections, 4verticals , time scale);
 stringLengthHistoryVert = zeros(N-1,4,num_frames_to_render);
@@ -226,6 +229,7 @@ while frame < num_frames_to_render
     
     % Record the string lengths
     stringLengthsOverTime(:,frame) = stringLengths;
+    lengthsOverTime(:,frame) = Lengths;
     
     % Calculate the forces in the cables, and record the color differently
     % if they're in tension or compression
