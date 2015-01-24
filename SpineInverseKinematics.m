@@ -112,7 +112,7 @@ stringPts=zeros(16*(N-1),3);
 
 % iterate over number of frames to render
 frame=0;
-num_frames_to_render = 70;
+num_frames_to_render = 20;
 
 % Uncomment these lines to save a video
 %videoObject = VideoWriter('videos/SpineExample.avi');
@@ -132,6 +132,10 @@ stringLengthHistoryVert = zeros(N-1,4,num_frames_to_render);
 stringLengthHistorySadd = zeros(N-1,4,num_frames_to_render);
 %------------------------------------------------------------------------------------
 
+% Record changes in cable force (Drew) 1-23-15
+% hard-coded constant comes from the observation that there are 8 cables connecting two
+% adjacent tetrahedra
+stringForceHistory = zeros((N-1)*8,num_frames_to_render);
 
 % Main loop
 while frame < num_frames_to_render
@@ -223,6 +227,18 @@ while frame < num_frames_to_render
     % Record the string lengths
     stringLengthsOverTime(:,frame) = stringLengths;
     
+    % Calculate the forces in the cables, and record the color differently
+    % if they're in tension or compression
+    % only search the first 's' number of elements because those are the cables
+    % this is for example 4*8 = 32
+    Force=Lengths.*q(1:(N-1)*8);
+    for i=1:(N-1)*8
+        if Force(i)>0
+            color(i)='b';
+        else
+            color(i)='r';
+        end
+    end
     
     %----------- CABLE LENGTH RECORDER (CHANWOO)-------------------------
     for i = 1:N-1       % Connection between tetrahedrons
@@ -233,17 +249,10 @@ while frame < num_frames_to_render
         end
     end
     %---------------------------------------------------------------------
-
-    % Calculate the forces in the cables, and record the color differently
-    % if they're in tension or compression
-    Force=Lengths.*q(1:(N-1)*8);
-    for i=1:(N-1)*8
-        if Force(i)>0
-            color(i)='b';
-        else
-            color(i)='r';
-        end
-    end
+    
+    % Cable Force Recorder (Drew)
+    stringForceHistory(:,frame) = Force;  
+        
     
     hold off;
 
