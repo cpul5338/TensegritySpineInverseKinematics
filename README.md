@@ -1,6 +1,8 @@
 TensegritySpineInverseKinematics
 ================================
 
+*THIS REPOSITORY IS DEPRECATED. CURRENT WORK IS ONGOING AT https://github.com/BerkeleyExpertSystemTechnologiesLab/ultra-spine-simulations.
+
 MATLAB code for calculating and rendering inverse kinematics of a tensegrity spine, based on the standard Flemons spine model.
 
 No license yet - will be moved from public domain to (something else) soon.
